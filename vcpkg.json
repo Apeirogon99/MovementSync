@@ -1,0 +1,9 @@
+{
+    "name": "movementsync",
+    "version": "1.0.0",
+    "description": "Movement Sync SDL2 + Boost.Asio",
+    "dependencies": [
+        "sdl2",
+        "boost-asio"
+    ]
+}
