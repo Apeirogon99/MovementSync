@@ -20,14 +20,28 @@ find_package(Boost REQUIRED COMPONENTS system)
 # =================================================================
 add_library(MovementSyncCommon STATIC
     # 헤더 파일들 (Visual Studio 프로젝트에서 보이도록)
-    src/common/Vector2.h
-    # src/common/Entity.h
-    # src/common/NetworkMessage.h
+    src/Common/AStar/Grid.h
+    src/Common/AStar/Node.h
+    src/Common/AStar/PathFinding.h
+
+    src/Common/Math/Vector2f.h
+    src/Common/Math/Vector2f_NetQuantize.h
+
+    src/Common/Game/Entity.h
+
+    src/Common/Protocol/Message.h
     
     # 소스 파일들
-    src/common/Vector2.cpp
-    # src/common/Entity.cpp
-    # src/common/NetworkMessage.cpp
+    src/Common/AStar/Grid.cpp
+    src/Common/AStar/Node.cpp
+    src/Common/AStar/PathFinding.cpp
+
+    src/Common/Math/Vector2f.cpp
+    src/Common/Math/Vector2f_NetQuantize.cpp
+
+    src/Common/Game/Entity.cpp
+
+    src/Common/Protocol/Message.cpp
 )
 
 # 공용 라이브러리 설정
@@ -44,12 +58,12 @@ set_target_properties(MovementSyncCommon PROPERTIES
 # =================================================================
 # 클라이언트 실행 파일
 # =================================================================
-add_executable(DeadReckoningClient
+add_executable(MovementSyncClient
     src/client/main.cpp
 )
 
 # 클라이언트 라이브러리 링크
-target_link_libraries(DeadReckoningClient PRIVATE 
+target_link_libraries(MovementSyncClient PRIVATE 
     MovementSyncCommon      # 공용 라이브러리
     SDL2::SDL2 
     SDL2::SDL2main 
@@ -59,12 +73,12 @@ target_link_libraries(DeadReckoningClient PRIVATE
 # =================================================================
 # 서버 실행 파일  
 # =================================================================
-add_executable(DeadReckoningServer
+add_executable(MovementSyncServer
     src/server/main.cpp
 )
 
 # 서버 라이브러리 링크
-target_link_libraries(DeadReckoningServer PRIVATE 
+target_link_libraries(MovementSyncServer PRIVATE 
     MovementSyncCommon      # 공용 라이브러리
     Boost::system
 )
@@ -73,8 +87,8 @@ target_link_libraries(DeadReckoningServer PRIVATE
 # Windows 추가 설정
 # =================================================================
 if(WIN32)
-    target_link_libraries(DeadReckoningClient PRIVATE ws2_32 wsock32)
-    target_link_libraries(DeadReckoningServer PRIVATE ws2_32 wsock32)
+    target_link_libraries(MovementSyncClient PRIVATE ws2_32 wsock32)
+    target_link_libraries(MovementSyncServer PRIVATE ws2_32 wsock32)
 endif()
 
 # =================================================================
@@ -82,7 +96,7 @@ endif()
 # =================================================================
 # Release 빌드 시 실행 파일들을 한 곳에 모으기
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_target_properties(DeadReckoningClient DeadReckoningServer PROPERTIES
+    set_target_properties(MovementSyncClient MovementSyncServer PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
 endif()
