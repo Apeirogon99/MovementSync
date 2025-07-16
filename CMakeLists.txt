@@ -59,7 +59,13 @@ set_target_properties(MovementSyncCommon PROPERTIES
 # 클라이언트 실행 파일
 # =================================================================
 add_executable(MovementSyncClient
-    src/client/main.cpp
+    # 헤더 파일
+    src/Client/World.h
+
+    # 소스 파일
+    src/Client/main.cpp
+
+    src/Client/World.cpp
 )
 
 # 클라이언트 라이브러리 링크
@@ -74,7 +80,7 @@ target_link_libraries(MovementSyncClient PRIVATE
 # 서버 실행 파일  
 # =================================================================
 add_executable(MovementSyncServer
-    src/server/main.cpp
+    src/Server/main.cpp
 )
 
 # 서버 라이브러리 링크

@@ -6,6 +6,8 @@
 #include "Common/Math/Vector2f.h"
 #include "Common/AStar/PathFinding.h"
 
+#include "World.h"
+
 using boost::asio::ip::udp;
 using boost::asio::ip::tcp;
 
@@ -18,6 +20,13 @@ int main(int argc, char* argv[])
 	{
 		printf("(%f, %f)\n", node->mPosition.x, node->mPosition.y);
 	}
+
+	World world; 
+	world.Initialize();
+
+	world.Run();
+
+	world.Destroy();
 
 	return 0;
 }

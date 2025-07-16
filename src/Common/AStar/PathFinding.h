@@ -21,6 +21,6 @@ private:
 	//std::list<Node*> RetracePath(Node* StartNode, Node* EndNode);
 	int GetDistance(Node* Lhs, Node* Rhs);
 
-private:
+public:
 	Grid mGrid;
 };
