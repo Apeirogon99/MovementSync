@@ -1,5 +1,6 @@
 #pragma once
 #include "Common/AStar/Grid.h"
+#include <memory>
 
 class PathFinding
 {
@@ -15,12 +16,9 @@ private:
 	PathFinding operator=(PathFinding&&) = delete;
 
 public:
-	std::list<Node*> FindPath(Vector2f StartPosition, Vector2f TargetPosition);
+	std::list<Node*> FindPath(const std::unique_ptr<Grid>& Grid, Vector2f StartPosition, Vector2f TargetPosition);
 
 private:
 	//std::list<Node*> RetracePath(Node* StartNode, Node* EndNode);
 	int GetDistance(Node* Lhs, Node* Rhs);
-
-public:
-	Grid mGrid;
 };

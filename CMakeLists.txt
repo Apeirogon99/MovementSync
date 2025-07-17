@@ -30,6 +30,7 @@ add_library(MovementSyncCommon STATIC
     src/Common/Game/Entity.h
 
     src/Common/Protocol/Message.h
+    src/Common/Protocol/Protocol.h
     
     # 소스 파일들
     src/Common/AStar/Grid.cpp
@@ -42,6 +43,7 @@ add_library(MovementSyncCommon STATIC
     src/Common/Game/Entity.cpp
 
     src/Common/Protocol/Message.cpp
+    src/Common/Protocol/Protocol.cpp
 )
 
 # 공용 라이브러리 설정
@@ -60,12 +62,18 @@ set_target_properties(MovementSyncCommon PROPERTIES
 # =================================================================
 add_executable(MovementSyncClient
     # 헤더 파일
+    src/Client/Game.h
     src/Client/World.h
+    src/Client/Network.h
+    src/Client/ClientMessageHandler.h
 
     # 소스 파일
     src/Client/main.cpp
 
+    src/Client/Game.cpp
     src/Client/World.cpp
+    src/Client/Network.cpp
+    src/Client/ClientMessageHandler.cpp
 )
 
 # 클라이언트 라이브러리 링크

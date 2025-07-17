@@ -13,12 +13,13 @@ PathFinding::~PathFinding()
 
 }
 
-std::list<Node*> PathFinding::FindPath(Vector2f StartPosition, Vector2f TargetPosition)
+std::list<Node*> PathFinding::FindPath(const std::unique_ptr<Grid>& Grid, Vector2f StartPosition, Vector2f TargetPosition)
 {
-	Node* startNode = mGrid.GetNodeFromPosition(StartPosition);
-	Node* targetNode = mGrid.GetNodeFromPosition(TargetPosition);
-
 	std::list<Node*> path;
+
+	Node* startNode = Grid->GetNodeFromPosition(StartPosition);
+	Node* targetNode = Grid->GetNodeFromPosition(TargetPosition);
+
 	std::list<Node*> openSet;
 	std::set<Node*> closedSet;
 
@@ -56,7 +57,7 @@ std::list<Node*> PathFinding::FindPath(Vector2f StartPosition, Vector2f TargetPo
 		closedSet.insert(currentNode);
 
 		// 이웃노드를 가져와서 값을 계산한 후 오픈 셋에 추가한다.
-		for(Node* neighbourNode : mGrid.GetNeighbours(currentNode))
+		for(Node* neighbourNode : Grid->GetNeighbours(currentNode))
 		{
 			if (!neighbourNode->mIsWalkable || closedSet.contains(neighbourNode))
 			{
@@ -85,6 +86,7 @@ std::list<Node*> PathFinding::FindPath(Vector2f StartPosition, Vector2f TargetPo
 			}
 		}
 	}
+
 	return path;
 }
 

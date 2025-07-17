@@ -1,33 +1,15 @@
-﻿#include <SDL.h>
-#include <boost/asio.hpp>
-#include <iostream>
-#include <thread>
-
-#include "Common/Math/Vector2f.h"
-#include "Common/AStar/PathFinding.h"
-
-#include "World.h"
-
-using boost::asio::ip::udp;
-using boost::asio::ip::tcp;
+﻿#include "Game.h"
 
 int main(int argc, char* argv[])
 {
-	PathFinding pf;
-	auto path = pf.FindPath({ 0,0 }, { 0, 100 });
+	std::unique_ptr<Game> game = std::make_unique<Game>();
 
-	for (Node* node : path)
+	if (game->Initialize())
 	{
-		printf("(%f, %f)\n", node->mPosition.x, node->mPosition.y);
+		game->Run();
 	}
 
-	World world; 
-	world.Initialize();
-
-	world.Run();
-
-	world.Destroy();
-
+	game->Destroy();
 	return 0;
 }
 

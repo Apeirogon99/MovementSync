@@ -1,19 +1,20 @@
 #include "Common/AStar/Grid.h"
-#include "Common/Math/Vector2f.h"
 #include <cmath>
 #include <algorithm>
 
-Grid::Grid() : mNumberOfGrids({100.0f, 100.0f}), mNodeSize(10.0f), mNodeHalfSize(mNodeSize * 0.5f)
+Grid::Grid(const Vector2f& GridSize, float NodeSize) : mNumberOfGrids(GridSize), mNodeSize(NodeSize), mNodeHalfSize(NodeSize * 0.5f)
 {
 	mGridSizeX = static_cast<int>(lround(mNumberOfGrids.x / mNodeSize));
 	mGridSizeY = static_cast<int>(lround(mNumberOfGrids.y / mNodeSize));
 
+	mGrid.resize(mGridSizeY);
 	for (int y = 0; y < mGridSizeY; ++y)
 	{
+		mGrid[y].resize(mGridSizeX);
 		for (int x = 0; x < mGridSizeX; ++x)
 		{
 			Vector2f nodePosition = Vector2f(x * mNodeSize + mNodeHalfSize, y * mNodeSize + mNodeHalfSize);
-			mGrid[y][x] = new Node(true, nodePosition, x, y);
+			mGrid[y][x] = std::make_unique<Node>(true, nodePosition, x, y);
 		}
 	}
 }
@@ -24,10 +25,10 @@ Grid::~Grid()
 	{
 		for (int y = 0; y < mGrid[0].size(); ++y)
 		{
-			if (mGrid[x][y] != nullptr)
-			{
-				delete mGrid[x][y];
-				mGrid[x][y] = nullptr;
+			if (mGrid[y][x] != nullptr)
+			{		  
+				mGrid[y][x].reset();
+				mGrid[y][x] = nullptr;
 			}
 		}
 	}
@@ -36,9 +37,9 @@ Grid::~Grid()
 std::list<Node*> Grid::GetNeighbours(Node* TargetNode)
 {
 	std::list<Node*> neighbours;
-	for (int x = -1; x <= 1; ++x)
+	for (int y = -1; y <= 1; ++y)
 	{
-		for (int y = -1; y <= 1; ++y)
+		for (int x = -1; x <= 1; ++x)
 		{
 			if (x == 0 && y == 0)
 			{
@@ -50,7 +51,7 @@ std::list<Node*> Grid::GetNeighbours(Node* TargetNode)
 
 			if (checkX >= 0 && checkX < mGridSizeX && checkY >= 0 && checkY < mGridSizeY)
 			{
-				neighbours.push_back(mGrid[checkX][checkY]);
+				neighbours.push_back(mGrid[checkY][checkX].get());
 			}
 		}
 	}
@@ -66,5 +67,5 @@ Node* Grid::GetNodeFromPosition(Vector2f Position)
 
 	int x = static_cast<int>(lround((mGridSizeX - 1) * percentX));
 	int y = static_cast<int>(lround((mGridSizeY - 1) * percentY));
-	return mGrid[x][y];
+	return mGrid[y][x].get();
 }

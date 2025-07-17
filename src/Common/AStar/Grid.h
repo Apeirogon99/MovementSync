@@ -1,12 +1,14 @@
 #pragma once
 #include "Common/AStar/Node.h"
-#include "array"
+#include "Common/Math/Vector2f.h"
+#include "memory"
+#include "vector"
 #include "list"
 
 class Grid
 {
 public:
-	Grid();
+	Grid(const Vector2f& GridSize, float NodeSize);
 	~Grid();
 
 private:
@@ -21,7 +23,7 @@ public:
 	Node* GetNodeFromPosition(Vector2f Position);
 
 public:
-	std::array<std::array<Node*, 10>, 10> mGrid = { nullptr, };
+	std::vector<std::vector<std::unique_ptr<Node>>> mGrid;
 
 	Vector2f mNumberOfGrids;
 	float	mNodeSize;

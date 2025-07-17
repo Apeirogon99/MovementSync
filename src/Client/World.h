@@ -15,21 +15,29 @@ public:
 public:
 	bool Initialize();
 	void Destroy();
-	
-public:
-	void Run();
 
-private:
+public:
+	inline bool IsRunning() const { return mIsRunning; }
+
+public:
+	void UpdateTime();
 	void HandleEvents();
 	void Update();
 	void Render();
+	void LimitFrameRate();
 
 private:
-	bool mIsRunning;
 	SDL_Window* mWindow;
 	SDL_Renderer* mRenderer;
 
-private:
-	PathFinding mPathFinder;
-	std::map<int, Entity*> mEntitys;
+public:
+	bool mIsRunning;
+	uint64_t mFrequency;
+	uint64_t mLastTime;
+
+	std::map<uint32_t, std::unique_ptr<Entity>> mEntitys;
+	uint32_t mLocalEntityId;
+
+	std::unique_ptr<PathFinding> mPathFinder;
+	std::unique_ptr<Grid> mMap;
 };
