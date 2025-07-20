@@ -37,6 +37,10 @@ Entity->mIntervalMoveSync = 0.1f; <br>
 회복 패턴과 최소 주기 설정에 따라 결과는 다릅니다만, 현재 기준 일시적 누적 전송량 57% 증가 대비하여 <br>
 평균 위치 오차를 27% 감소 및 낮은 오차 구간 발생 빈도가 62% 증가하여 안정적인 위치 동기화가 가능하였습니다. <br>
 
+<img width="360" height="210" alt="image" src="https://github.com/user-attachments/assets/66ce613e-1096-4e42-aa53-7b48b6d3f896" />
+
+<img width="360" height="210" alt="image" src="https://github.com/user-attachments/assets/e977bf1b-7d52-47b8-8dbd-64d53a05d448" />
+
 ## 결과 GIF
 
 ### 고정 주기
@@ -47,11 +51,6 @@ Entity->mIntervalMoveSync = 0.1f; <br>
 
 ## 결과 사진
 <img width="241" height="210" alt="image" src="https://github.com/user-attachments/assets/0c02feca-e52b-4057-b022-e92a11288d27" />
-
-<img width="360" height="210" alt="image" src="https://github.com/user-attachments/assets/66ce613e-1096-4e42-aa53-7b48b6d3f896" />
-
-<img width="360" height="210" alt="image" src="https://github.com/user-attachments/assets/e977bf1b-7d52-47b8-8dbd-64d53a05d448" />
-
 
 ## 참고
 [이득우의 꼭 배워야하는 게임 알고리](https://www.inflearn.com/course/%EA%B2%8C%EC%9E%84-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98?srsltid=AfmBOop6dMp3k7lA91OPR5NQBIGTTnWZBma8r3uTrY9XFidST7RZB5sU) - A*를 구현하는데 참고 하였스니다.
