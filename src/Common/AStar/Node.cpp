@@ -9,3 +9,15 @@ Node::~Node()
 {
 	mParent = nullptr;
 }
+
+
+bool CompareNodePosition(const Node* lhs, const Node* rhs)
+{
+	return (lhs->mGridX == rhs->mGridX && lhs->mGridY == rhs->mGridY);
+}
+
+bool CompareNodePositions(const std::list<Node*>& lList, const std::list<Node*>& rList)
+{
+	return lList.size() == rList.size() &&
+		std::equal(lList.begin(), lList.end(), rList.begin(), CompareNodePosition);
+}

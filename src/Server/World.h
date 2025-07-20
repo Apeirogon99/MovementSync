@@ -1,13 +1,16 @@
 #pragma once
-#include <SDL.h>
+#include <functional>
 #include <map>
 
-#include "Network.h"
+#include "Task.h"
+#include "Session.h"
 
+#include "Common/Utils/Time.h"
 #include "Common/Game/Entity.h"
 #include "Common/AStar/PathFinding.h"
+#include "Common/Protocol/Message.h"
 
-class World
+class World : public TaskQueue
 {
 public:
 	World();
@@ -21,36 +24,30 @@ public:
 	inline bool IsRunning() const { return mIsRunning; }
 
 public:
+	void CreateEntity(const std::shared_ptr<Session>& Session);
+	void ToggleWalkeable(int GridX, int GridY);
+
+	void PathFind(Entity* Entity, Node* DestNode);
+	void PathRefind();
+
+public:
 	void SetMessageHandler(std::function<void(std::unique_ptr<Message>)> Handler)
 	{
 		mMessageHandler = Handler;
 	}
 
 public:
-	void UpdateTime();
-	void HandleEvents();
-	void Update();
-	void Render();
-	void LimitFrameRate();
-
-
-
-private:
-	SDL_Window* mWindow;
-	SDL_Renderer* mRenderer;
+	void Update(float DeltaTime);
 
 public:
 	bool mIsRunning;
-	uint64_t mFrequency;
-	uint64_t mLastTime;
 
 	std::map<uint32_t, std::unique_ptr<Entity>> mEntitys;
-	std::map<uint32_t, std::unique_ptr<Entity>> mServerEntitys;
-	uint32_t mLocalEntityId;
+	std::unordered_map<uint32_t, uint32_t> mSessionToEntity;
 
 	std::unique_ptr<PathFinding> mPathFinder;
 	std::unique_ptr<Grid> mMap;
 
 	// Handler
-	std::function<void(std::unique_ptr<Message> Message)> mMessageHandler;
+	std::function<void(std::unique_ptr<Message>)> mMessageHandler;
 };

@@ -30,7 +30,7 @@ class MessageSerializer
 {
 public:
     template<typename T>
-    static std::shared_ptr<Message> Serialize(uint16_t Id, const T& Object)
+    static std::unique_ptr<Message> Serialize(uint16_t Id, const T& Object)
     {
         const size_t dataSize = sizeof(Object);
         const size_t messageSize = dataSize + sizeof(MessageHeader);
@@ -46,7 +46,7 @@ public:
         buffer.insert(buffer.end(), header, header + sizeof(MessageHeader));
         buffer.insert(buffer.end(), data, data + sizeof(Object));
 
-        return std::make_shared<Message>(Id, static_cast<uint16_t>(messageSize), buffer);
+        return std::make_unique<Message>(Id, static_cast<uint16_t>(messageSize), buffer);
     }
 
     template<typename T>

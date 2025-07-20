@@ -42,13 +42,7 @@ std::list<Node*> PathFinding::FindPath(const std::unique_ptr<Grid>& Grid, Vector
 		// 가장 낮은 값을 가진 노드가 종착노드면 탐색을 종료한다.
 		if (currentNode == targetNode)
 		{
-			// 경로 생성
-			while (targetNode != startNode)
-			{
-				path.push_back(targetNode);
-				targetNode = targetNode->mParent;
-			}
-			path.reverse();
+			path = RetracePath(startNode, targetNode);
 			break;
 		}
 
@@ -90,20 +84,30 @@ std::list<Node*> PathFinding::FindPath(const std::unique_ptr<Grid>& Grid, Vector
 	return path;
 }
 
-//std::list<Node*> PathFinding::RetracePath(Node* StartNode, Node* EndNode)
-//{
-//	std::list<Node*> path;
-//	Node* currentNode = EndNode;
-//
-//	while (currentNode != StartNode) 
-//	{
-//		path.push_back(currentNode);
-//		currentNode = currentNode->mParent;
-//	}
-//
-//	path.reverse();
-//	return path;
-//}
+
+
+std::list<Node*> PathFinding::RetracePath(Node* StartNode, Node* EndNode)
+{
+	std::list<Node*> path;
+
+	Node* currentNode = EndNode;
+	GridDirection lastDirection = GridDirection::None;
+
+	while (currentNode != StartNode) 
+	{
+		GridDirection currentDirection = Grid::GetGridDirection(currentNode, currentNode->mParent);
+
+		if (lastDirection != currentDirection)
+		{
+			path.push_back(currentNode);
+			lastDirection = currentDirection;
+		}
+		currentNode = currentNode->mParent;
+	}
+
+	path.reverse();
+	return path;
+}
 
 int PathFinding::GetDistance(Node* Lhs, Node* Rhs)
 {

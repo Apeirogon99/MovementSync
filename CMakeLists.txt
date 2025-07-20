@@ -31,6 +31,8 @@ add_library(MovementSyncCommon STATIC
 
     src/Common/Protocol/Message.h
     src/Common/Protocol/Protocol.h
+
+    src/Common/Utils/Time.h
     
     # 소스 파일들
     src/Common/AStar/Grid.cpp
@@ -44,6 +46,8 @@ add_library(MovementSyncCommon STATIC
 
     src/Common/Protocol/Message.cpp
     src/Common/Protocol/Protocol.cpp
+
+    src/Common/Utils/Time.cpp
 )
 
 # 공용 라이브러리 설정
@@ -88,7 +92,23 @@ target_link_libraries(MovementSyncClient PRIVATE
 # 서버 실행 파일  
 # =================================================================
 add_executable(MovementSyncServer
+    # 헤더 파일
+    src/Server/Game.h
+    src/Server/World.h
+    src/Server/Network.h
+    src/Server/Session.h
+    src/Server/Task.h
+    src/Server/ServerMessageHandler.h
+
+    # 소스 파일
     src/Server/main.cpp
+
+    src/Server/Game.cpp
+    src/Server/World.cpp
+    src/Server/Network.cpp
+    src/Server/Session.cpp
+    src/Server/Task.cpp
+    src/Server/ServerMessageHandler.cpp
 )
 
 # 서버 라이브러리 링크

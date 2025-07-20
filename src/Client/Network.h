@@ -11,7 +11,7 @@
 class Network
 {
 public:
-    Network(boost::asio::io_context& Context, const std::string& Host, uint16_t Port);
+    Network(const std::string& Host, const uint16_t Port);
     ~Network();
 
 public:
@@ -22,14 +22,14 @@ public:
     void Connect();
     void Disconnect();
 
-    void Write(std::shared_ptr<Message> Message);
+    void Write(std::unique_ptr<Message> Message);
     void PollMessage();
 
 public:
     inline bool IsConnected() const { return mIsConnected; }
 
 public:
-    void SetMessageHandler(std::function<void(std::unique_ptr<Message>&)> Handler)
+    void SetMessageHandler(std::function<void(std::unique_ptr<Message>)> Handler)
     {
         mMessageHandler = Handler;
     }
@@ -52,8 +52,9 @@ private:
     bool mIsConnected;
 
     std::thread mNetworkThread;
-    boost::asio::io_context& mContext;
+    boost::asio::io_context mContext;
     boost::asio::ip::tcp::socket mSocket;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> mWorkGuard;
 
     std::string mHost;
     uint16_t mPort;
@@ -64,11 +65,11 @@ private:
     std::unordered_set<std::unique_ptr<Message>> mRecvMessages;
     std::mutex mRecvMutex;
 
-    std::queue<std::shared_ptr<Message>> mWriteQueue;
+    std::queue<std::unique_ptr<Message>> mWriteQueue;
     std::mutex mWriteMutex;
 
     // Handler
-    std::function<void(std::unique_ptr<Message>& Message)> mMessageHandler;
+    std::function<void(std::unique_ptr<Message>)> mMessageHandler;
     std::function<void()> mConnectHandler;
     std::function<void(boost::system::error_code&)> mDisconnectHandler;
 };

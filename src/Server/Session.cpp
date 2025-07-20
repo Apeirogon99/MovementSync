@@ -1,69 +1,27 @@
-#include "Network.h"
-#include <iostream>
+#include "Session.h"
 
-Network::Network(const std::string& Host, const uint16_t Port) : 
-    mIsConnected(false),
-    mContext(), mSocket(mContext), mWorkGuard(boost::asio::make_work_guard(mContext)), mHost(Host), mPort(Port),
+Session::Session(boost::asio::ip::tcp::socket Socket, const uint32_t SessionId) :
+    mSessionId(SessionId), mSocket(std::move(Socket)),
     mRecvBuffer(), mRecvBufferCount(0)
 {
-    
 }
 
-Network::~Network()
+Session::~Session()
 {
 }
 
-bool Network::Initialize()
+void Session::Start()
 {
-    mNetworkThread = std::thread([&]()
-        {
-            mContext.run();
-        });
-
-	return true;
+    ReadAsync();
 }
 
-void Network::Destroy()
+void Session::Close()
 {
-    Disconnect();
-}
-
-void Network::Connect()
-{
-    boost::asio::ip::tcp::resolver resolver(mContext);
-    boost::asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(mHost, std::to_string(mPort));
-
-    boost::asio::async_connect(
-        mSocket,
-        endpoints,
-        [&](boost::system::error_code error, boost::asio::ip::tcp::endpoint ep)
-        {
-            if (!error)
-            {
-                mConnectHandler();
-                mIsConnected = true;
-                ReadAsync();
-            }
-            else
-            {
-                std::cerr << "Connection failed: " << error.message() << std::endl;
-            }
-        });
-
-}
-
-void Network::Disconnect()
-{
-    mNetworkThread.join();
-
     mSocket.close();
-    mIsConnected = false;
 }
 
-void Network::Write(std::unique_ptr<Message> Message)
+void Session::Write(std::unique_ptr<Message> Message)
 {
-    if (!IsConnected()) return;
-
     std::lock_guard<std::mutex> lock(mWriteMutex);
     bool isWrite = !mWriteQueue.empty();
     mWriteQueue.push(std::move(Message));
@@ -74,25 +32,7 @@ void Network::Write(std::unique_ptr<Message> Message)
     }
 }
 
-void Network::PollMessage()
-{
-    std::list<std::unique_ptr<Message>> processMessage;
-    {
-        std::lock_guard<std::mutex> lock(mRecvMutex);
-        for (auto iter = mRecvMessages.begin(); iter != mRecvMessages.end();)
-        {
-            auto message = mRecvMessages.extract(iter++);
-            processMessage.push_back(std::move(message.value()));
-        }
-    }
-
-    for (auto iter = processMessage.begin(); iter != processMessage.end(); ++iter)
-    {
-        mMessageHandler(std::move(*iter));
-    }
-}
-
-void Network::ReadAsync()
+void Session::ReadAsync()
 {
     std::array<BYTE, 1024> data;
 
@@ -123,10 +63,8 @@ void Network::ReadAsync()
                     std::vector<BYTE> payload;
                     payload.resize(header->mSize);
                     std::copy(&mRecvBuffer[processLength], &mRecvBuffer[processLength + header->mSize], payload.begin());
-                    {
-                        std::lock_guard<std::mutex> lock(mRecvMutex);
-                        mRecvMessages.insert(std::make_unique<Message>(header->mId, header->mSize, payload));
-                    }
+                    std::unique_ptr<Message> message = std::make_unique<Message>(header->mId, header->mSize, payload);
+                    mMessageHandler(shared_from_this(), std::move(message));
 
                     processLength += messageSize;
                 }
@@ -145,13 +83,12 @@ void Network::ReadAsync()
             }
             else
             {
-                // boost::asio::error::eof
-                mDisconnectHandler(error);
+                mDisconnectHandler(shared_from_this(), error);
             }
         });
 }
 
-void Network::WriteAsync()
+void Session::WriteAsync()
 {
     const std::unique_ptr<Message>& message = mWriteQueue.front();
 
@@ -170,7 +107,7 @@ void Network::WriteAsync()
             }
             else
             {
-                mDisconnectHandler(error);
+                mDisconnectHandler(shared_from_this(), error);
             }
         });
 }

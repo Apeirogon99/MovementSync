@@ -18,29 +18,37 @@ bool Game::Initialize()
 		return false;
 	}
 
-	//boost::asio::io_context context;
-	//mNetwork = std::make_unique<Network>(context, "localhost", 9000);
-	//if (!mNetwork && !mNetwork->Initialize())
-	//{
-	//	return false;
-	//}
+	mNetwork = std::make_unique<Network>("localhost", 9000);
+	if (!mNetwork->Initialize())
+	{
+		return false;
+	}
 
-	//mNetwork->SetMessageHandler([&](std::unique_ptr<Message>& Message)
-	//	{
-	//		std::cout << "Received" << std::endl;
-	//		ClientMessageHandler::ProcessMessage(mWorld, Message);
-	//	});
+	mWorld->SetMessageHandler([&](std::unique_ptr<Message> Message)
+		{
+			//std::cout << "Writed" << std::endl;
+			mNetwork->Write(std::move(Message));
+		});
 
-	//mNetwork->SetConnectHandler([&]()
-	//	{
-	//		std::cout << "Connected to server" << std::endl;
-	//	});
+	mNetwork->SetMessageHandler([&](std::unique_ptr<Message> Message)
+		{
+			//std::cout << "Received" << std::endl;
+			ClientMessageHandler::ProcessMessage(mWorld, std::move(Message));
+		});
 
-	//mNetwork->SetDisconnectHandler([&](boost::system::error_code ec)
-	//	{
-	//		std::cout << "Disconnected from server : " << ec.message() << std::endl;
-	//		mNetwork->Disconnect();
-	//	});
+	mNetwork->SetConnectHandler([&]()
+		{
+			std::cout << "Connected to server" << std::endl;
+
+		});
+
+	mNetwork->SetDisconnectHandler([&](boost::system::error_code ec)
+		{
+			std::cout << "Disconnected from server : " << ec.message() << std::endl;
+			mNetwork->Disconnect();
+		});
+
+	mNetwork->Connect();
 
 	return true;
 }
@@ -60,29 +68,31 @@ void Game::Destroy()
 
 void Game::Run()
 {
-	//while (mNetwork->IsConnected() && mWorld->IsRunning())
-	//{
-	//	mWorld->HandleEvents();
-
-	//	mNetwork->PollMessage();
-
-	//	mWorld->Update();
-
-	//	mWorld->Render();
-
-	//	mWorld->LimitFrameRate();
-	//}
-
+	// 네트워크 포함
 	while (mWorld->IsRunning())
 	{
 		mWorld->HandleEvents();
+
+		mNetwork->PollMessage();	// 네트워크 메세지 처리
 
 		mWorld->Update();
 
 		mWorld->Render();
 
-		//mWorld->LimitFrameRate();
+		mWorld->LimitFrameRate();
 	}
+
+	// 클라 전용
+	//while (mWorld->IsRunning())
+	//{
+	//	mWorld->HandleEvents();
+
+	//	mWorld->Update();
+
+	//	mWorld->Render();
+
+	//	//mWorld->LimitFrameRate();
+	//}
 
 	Stop();
 }

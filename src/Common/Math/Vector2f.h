@@ -128,13 +128,26 @@ public:
         return (*this - other).magnitudeSquared();
     }
 
+    float angle() const 
+    {
+        return std::atan2(y, x);
+    }
+
     bool isZero() const 
     {
         const float epsilon = 1e-6f;
         return std::abs(x) < epsilon && std::abs(y) < epsilon;
     }
 
+    bool ContationNaN()
+    {
+        return !isfinite(x) || !isfinite(y);
+    }
+
 public:
     float x;
     float y;
 };
+
+Vector2f Lerp(const Vector2f& a, const Vector2f& b, float t);
+Vector2f ClampVector(const Vector2f& Value, const Vector2f& Min, const Vector2f& Max);

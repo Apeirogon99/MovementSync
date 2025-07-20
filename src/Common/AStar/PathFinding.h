@@ -2,6 +2,8 @@
 #include "Common/AStar/Grid.h"
 #include <memory>
 
+
+
 class PathFinding
 {
 public:
@@ -19,6 +21,6 @@ public:
 	std::list<Node*> FindPath(const std::unique_ptr<Grid>& Grid, Vector2f StartPosition, Vector2f TargetPosition);
 
 private:
-	//std::list<Node*> RetracePath(Node* StartNode, Node* EndNode);
+	std::list<Node*> RetracePath(Node* StartNode, Node* EndNode);
 	int GetDistance(Node* Lhs, Node* Rhs);
 };

@@ -1,8 +1,12 @@
 #include "World.h"
+#include "ClientMessageHandler.h"
+
+#include "Common/Utils/Time.h"
 
 World::World() : 
 	mIsRunning(false), mWindow(nullptr), mRenderer(nullptr),
-	mEntitys(), mLocalEntityId(0)
+	mEntitys(), mLocalEntityId(0),
+	mFrequency(0), mLastTime(0)
 {
 }
 
@@ -49,9 +53,6 @@ bool World::Initialize()
 	float nodeSize = 20.0f;
 	mMap = std::make_unique<Grid>(gridSize, nodeSize);
 	mPathFinder = std::make_unique<PathFinding>();
-
-	Vector2f position = { 100.0f, 100.0f };
-	mEntitys.insert({ 0, std::make_unique<Entity>(position) });
 
 	mIsRunning = true;
 	return true;
@@ -117,13 +118,31 @@ void World::HandleEvents()
 			switch (event.button.button)
 			{
 			case SDL_BUTTON_LEFT:
-				localEntity->mPath = mPathFinder->FindPath(mMap, localEntity->mPosition, position);
-				break;
+				{
+					localEntity->mPath = mPathFinder->FindPath(mMap, localEntity->mPosition, position);
+
+					C2S_PATH_FINDING protocol;
+					protocol.TimeStamp = Time::GetCurrentTimeMs();
+					protocol.DestGridX = node->mGridX;
+					protocol.DestGridY = node->mGridY;
+
+					std::unique_ptr<Message> message = MessageSerializer::Serialize<C2S_PATH_FINDING>(static_cast<uint16_t>(EMessageId::PKT_C2S_PATH_FINDING), protocol);
+					mMessageHandler(std::move(message));
+					break;
+				}
 			case SDL_BUTTON_RIGHT:
-				mMap->mGrid[node->mGridY][node->mGridX]->mIsWalkable = false;
-				break;
+				{
+					C2S_TOGGLE_WALKABLE protocol;
+					protocol.GridX = node->mGridX;
+					protocol.GridY = node->mGridY;
+
+					std::unique_ptr<Message> message = MessageSerializer::Serialize<C2S_TOGGLE_WALKABLE>(static_cast<uint16_t>(EMessageId::PKT_C2S_TOGGLE_WALKABLE), protocol);
+					mMessageHandler(std::move(message));
+					break;
+				}
 			}
-			break;
+
+		break;
 		}
 
 		default:
@@ -144,6 +163,12 @@ void World::Update()
 		const std::unique_ptr<Entity>& entity = iter->second;
 
 		entity->MoveTowardsNextPath(deltaTime);
+
+		// 보정 필요
+		if (entity->mIsCorrection)
+		{
+			entity->PositionCorrection(deltaTime);
+		}
 	}
 }
 
@@ -153,9 +178,9 @@ void World::Render()
 	SDL_RenderClear(mRenderer);
 
 	// 그리드 그리기
-	for (int row = 0; row < mMap->mGridSizeY; row++) 
+	for (int row = 0; row < mMap->mGridSizeY; row++)
 	{
-		for (int col = 0; col < mMap->mGridSizeX; col++) 
+		for (int col = 0; col < mMap->mGridSizeX; col++)
 		{
 			Node* node = mMap->mGrid[col][row].get();
 			// 현재 셀의 화면 위치 계산
@@ -188,11 +213,11 @@ void World::Render()
 
 		if (entityId == mLocalEntityId)
 		{
-			SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
+			SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
 		}
 		else
 		{
-			SDL_SetRenderDrawColor(mRenderer, 255, 255, 255, 255);
+			SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
 		}
 
 		float entitySize = 10.0f;
@@ -217,7 +242,7 @@ void World::Render()
 		{
 			Node* start = *path.begin();
 
-			SDL_SetRenderDrawColor(mRenderer, 0, 0, 255, 255);
+			SDL_SetRenderDrawColor(mRenderer, 255, 51, 153, 255);
 
 			SDL_RenderDrawLine(
 				mRenderer,
@@ -237,7 +262,24 @@ void World::Render()
 			}
 		}
 	}
-	
+
+	for (auto iter = mServerEntitys.begin(); iter != mServerEntitys.end(); ++iter)
+	{
+		const uint32_t entityId = iter->first;
+		const std::unique_ptr<Entity>& entity = iter->second;
+
+		SDL_SetRenderDrawColor(mRenderer, 255, 0, 0, 255);
+
+		float entitySize = 10.0f;
+
+		SDL_FRect entityRect;
+		entityRect.x = entity->mPosition.x - (entitySize * 0.5f);
+		entityRect.y = entity->mPosition.y - (entitySize * 0.5f);
+		entityRect.w = entitySize;
+		entityRect.h = entitySize;
+
+		SDL_RenderDrawRectF(mRenderer, &entityRect);
+	}
 
 	SDL_RenderPresent(mRenderer);
 }

@@ -69,3 +69,55 @@ Node* Grid::GetNodeFromPosition(Vector2f Position)
 	int y = static_cast<int>(lround((mGridSizeY - 1) * percentY));
 	return mGrid[y][x].get();
 }
+
+GridDirection Grid::GetGridDirection(Node* From, Node* To)
+{
+	int dirX = To->mGridX - From->mGridX;
+	int dirY = To->mGridY - From->mGridY;
+
+	if(dirX == 0 && dirY == 0) return GridDirection::None;
+
+	int noDirX = (dirX > 0) ? 1 : (dirX < 0) ? -1 : 0;
+	int noDirY = (dirY > 0) ? 1 : (dirY < 0) ? -1 : 0;
+
+	if (noDirX == +0 && noDirY == -1)	return GridDirection::North;
+	if (noDirX == +1 && noDirY == -1)	return GridDirection::NorthEast;
+	if (noDirX == +1 && noDirY == +0)	return GridDirection::East;
+	if (noDirX == +1 && noDirY == +1)	return GridDirection::SouthEast;
+	if (noDirX == +0 && noDirY == +1)	return GridDirection::South;
+	if (noDirX == -1 && noDirY == +1)	return GridDirection::SouthWest;
+	if (noDirX == -1 && noDirY == +0)	return GridDirection::West;
+	if (noDirX == -1 && noDirY == -1)	return GridDirection::NorthWest;
+
+	return GridDirection::None;
+}
+
+int Grid::GetGridDirectionAngle(GridDirection Direction)
+{
+	switch (Direction)
+	{
+		case GridDirection::North:		return 0;
+		case GridDirection::NorthEast:	return 45;
+		case GridDirection::East:		return 90;
+		case GridDirection::SouthEast:	return 135;
+		case GridDirection::South:		return 180;
+		case GridDirection::SouthWest:	return 225;
+		case GridDirection::West:		return 270;
+		case GridDirection::NorthWest:	return 315;
+		default: return 0;
+	}
+}
+
+bool Grid::IsAngleExceeded(const GridDirection From, const GridDirection To, const int Angle)
+{
+	int fromAngle = GetGridDirectionAngle(From);
+	int toAngle = GetGridDirectionAngle(To);
+
+	int angleDiff = std::abs(fromAngle - toAngle);
+	if (angleDiff > 180)
+	{
+		angleDiff = 360 - angleDiff;
+	}
+
+	return angleDiff >= Angle;
+}

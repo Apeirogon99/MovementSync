@@ -1,5 +1,6 @@
 #pragma once
 #include "Common/Math/Vector2f.h"
+#include <list>
 
 class Node
 {
@@ -31,3 +32,6 @@ public:
 
 	Node* mParent;
 };
+
+bool CompareNodePosition(const Node* lhs, const Node* rhs);
+bool CompareNodePositions(const std::list<Node*>& lList, const std::list<Node*>& rList);

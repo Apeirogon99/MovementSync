@@ -5,6 +5,19 @@
 #include "vector"
 #include "list"
 
+enum class GridDirection
+{
+	None,
+	North,
+	NorthEast,
+	East,
+	SouthEast,
+	South,
+	SouthWest,
+	West,
+	NorthWest
+};
+
 class Grid
 {
 public:
@@ -23,6 +36,11 @@ public:
 	Node* GetNodeFromPosition(Vector2f Position);
 
 public:
+	static GridDirection GetGridDirection(Node* From, Node* To);
+	static int GetGridDirectionAngle(GridDirection Direction);
+	static bool IsAngleExceeded(const GridDirection From, const GridDirection To, const int Angle);
+
+public:
 	std::vector<std::vector<std::unique_ptr<Node>>> mGrid;
 
 	Vector2f mNumberOfGrids;
@@ -31,4 +49,3 @@ public:
 	int		mGridSizeX;
 	int		mGridSizeY;
 };
-
