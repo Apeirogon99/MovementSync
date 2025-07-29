@@ -15,23 +15,8 @@ MovementSync는 MMORPG 프로젝트 제작 중 데드레커닝의 일부 문제�
 그래서 해당 문제를 90도 이상 방향을 변경한 경우 이를 감지하여 <br>
 기존 0.25초마다 이동 동기화를 하는 것이 아닌 동적(0.1 -> 0.25)으로 처리하고자 하였습니다. <br>
 
-## Vcpkg
-### SDL2 : 그래픽 및 입력
-### Boost.asio : 네트워크
-
-mkdir build <br>
-cd build <br>
-
-cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake <br>
-cmake --build . --config Release <br>
-
-## 조작
-좌 클릭 : 이동 <br>
-우 클릭 : 벽 설치 <br>
-
-## 사용법
-귀찮으시겠지만 다음 줄을 찾아 주석처리 해주시면 됩니다... <br>
-Entity->mIntervalMoveSync = 0.1f; <br>
+## 테스트 환경
+<img width="241" height="210" alt="image" src="https://github.com/user-attachments/assets/0c02feca-e52b-4057-b022-e92a11288d27" />
 
 ## 결과 요약
 회복 패턴과 최소 주기 설정에 따라 결과는 다릅니다만, 현재 기준 일시적 누적 전송량 57% 증가 대비하여 <br>
@@ -49,8 +34,23 @@ Entity->mIntervalMoveSync = 0.1f; <br>
 ### 동적 주기
 ![동적 이동](https://github.com/user-attachments/assets/3c80a178-4236-4769-8e5f-e23cc36ec1ec)
 
-## 결과 사진
-<img width="241" height="210" alt="image" src="https://github.com/user-attachments/assets/0c02feca-e52b-4057-b022-e92a11288d27" />
+## Vcpkg
+### SDL2 : 그래픽 및 입력
+### Boost.asio : 네트워크
+
+mkdir build <br>
+cd build <br>
+
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake <br>
+cmake --build . --config Release <br>
+
+## 조작
+좌 클릭 : 이동 <br>
+우 클릭 : 벽 설치 <br>
+
+## 사용법
+귀찮으시겠지만 다음 줄을 찾아 주석처리 해주시면 됩니다... <br>
+Entity->mIntervalMoveSync = 0.1f; <br>
 
 ## 참고
 [이득우의 꼭 배워야하는 게임 알고리](https://www.inflearn.com/course/%EA%B2%8C%EC%9E%84-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98?srsltid=AfmBOop6dMp3k7lA91OPR5NQBIGTTnWZBma8r3uTrY9XFidST7RZB5sU) - A*를 구현하는데 참고 하였스니다.
