@@ -34,6 +34,94 @@ MovementSync는 MMORPG 프로젝트 제작 중 데드레커닝의 일부 문제�
 ### 동적 주기
 ![동적 이동](https://github.com/user-attachments/assets/3c80a178-4236-4769-8e5f-e23cc36ec1ec)
 
+## 주요 코드
+
+### 방향 감지
+
+경로 탐색을 시도했다면 이전 경로와 현재 경로를 비교하였는데 방향이 90도 이상 변경 되었을 경우 이를 감지하여 동기화 주기를 줄입니다. <br>
+
+```
+  // 경로 탐색
+  std::list<Node*> path = mPathFinder->FindPath(mMap, Entity->mPosition, DestNode->mPosition);
+
+  // 이전 탐색 경로가 있었다면
+	if (!Entity->mPath.empty() && !path.empty())
+	{
+		Node* curNode = mMap->GetNodeFromPosition(Entity->mPosition);
+		Node* oldNode = Entity->mPath.front();
+		Node* nextNode = path.front();
+
+		GridDirection currentDirection = Grid::GetGridDirection(curNode, oldNode);
+		GridDirection nextDirection = Grid::GetGridDirection(curNode, nextNode);
+
+    // 방향 감지
+		if (Grid::IsAngleExceeded(currentDirection, nextDirection, 90))
+		{
+			// 즉시 동기화 주기를 낮춤
+			Entity->mIntervalMoveSync = 0.1f;
+		}
+	}
+```
+
+```
+// 방향을 가져와서 비교 후 Angle만큼 틀어져 있다면 감지합니다.
+bool Grid::IsAngleExceeded(const GridDirection From, const GridDirection To, const int Angle)
+{
+	int fromAngle = GetGridDirectionAngle(From);
+	int toAngle = GetGridDirectionAngle(To);
+
+	int angleDiff = std::abs(fromAngle - toAngle);
+	if (angleDiff > 180)
+	{
+		angleDiff = 360 - angleDiff;
+	}
+
+	return angleDiff >= Angle;
+}
+```
+
+### 동기화 회복
+
+동기화 회복의 경우에는 방향 감지 이후 줄어든 이동 동기화를 천천히 회복시키는 상황입니다.  <br>
+그래서 0.1 -> 0.25까지 점전적으로 회복이 되어지도록 하였습니다.  <br>
+
+```
+// 최소값에서 최대값까지 0.015씩 증가하는 회복 코드입니다.
+void Entity::RecoveyIntervalMoveSync()
+{
+	const float MinInterval = 0.1f;
+	const float MaxInterval = 0.25f;
+	const float TotalRange = MaxInterval - MinInterval;
+
+	const float IncrementRatio = 0.1f;
+
+	if (mIntervalMoveSync >= MaxInterval) return;
+
+	float incrementStep = TotalRange * IncrementRatio;
+	mIntervalMoveSync += incrementStep;
+
+	if (mIntervalMoveSync > MaxInterval)
+	{
+		mIntervalMoveSync = MaxInterval;
+	}
+}
+```
+
+```
+// 이동 동기화 주기를 고정 프레임에 의해 동작되면서 회복되어집니다.
+entity->MoveTowardsNextPath(DeltaTime);
+
+entity->mLastMoveSync += DeltaTime;
+if (entity->mLastMoveSync > entity->mIntervalMoveSync)
+{
+	entity->RecoveyIntervalMoveSync();
+
+  /* 이동 정보 전달 */
+  
+  entity->mLastMoveSync = 0.0f;
+}
+```
+
 ## Vcpkg
 ### SDL2 : 그래픽 및 입력
 ### Boost.asio : 네트워크
